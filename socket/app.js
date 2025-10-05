@@ -2,14 +2,17 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
-// ✅ Allow CORS from both localhost and production frontend
 app.use(cors({
   origin: [
-    "http://localhost:5173", // local dev
-    process.env.CLIENT_URL || "https://your-frontend-domain.com" // production
+    "http://localhost:5173",
+    process.env.CLIENT_URL || "https://your-frontend-domain.com"
   ],
   credentials: true,
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
@@ -28,6 +31,27 @@ const io = new Server(server, {
   },
 });
 
+// JWT Authentication Middleware
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth.token || socket.handshake.query.token;
+    
+    if (!token) {
+      return next(new Error('Authentication error: No token provided'));
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.id || decoded.userId;
+    socket.user = decoded;
+    
+    console.log('✅ User authenticated:', decoded.id);
+    next();
+  } catch (err) {
+    console.log('❌ Authentication failed:', err.message);
+    next(new Error('Authentication error: Invalid token'));
+  }
+});
+
 let onlineUser = [];
 
 const addUser = (userId, socketId) => {
@@ -42,9 +66,12 @@ const removeUser = (socketId) => {
 const getUser = (userId) => onlineUser.find((user) => user.userId === userId);
 
 io.on("connection", (socket) => {
-  console.log("✅ New user connected:", socket.id);
+  console.log("✅ Authenticated user connected:", socket.userId);
 
-  socket.on("newUser", (userId) => addUser(userId, socket.id));
+  socket.on("newUser", (userId) => {
+    // Use authenticated user ID instead of trusting client
+    addUser(socket.userId, socket.id);
+  });
 
   socket.on("sendMessage", ({ receiverId, data }) => {
     const receiver = getUser(receiverId);
@@ -53,9 +80,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("disconnect", () => removeUser(socket.id));
+  socket.on("disconnect", () => {
+    removeUser(socket.id);
+    console.log("❌ User disconnected:", socket.userId);
+  });
 });
 
-// ✅ Use Render’s dynamic port
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

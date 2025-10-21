@@ -65,16 +65,18 @@ export const login = async (req, res) => {
 
     const { password: userPassword, ...userInfo } = user;
 
-   res
+  res
   .cookie("token", token, {
     httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'None',
+    secure: true,           // Must be true for sameSite: 'None'
+    sameSite: 'None',       // Required for cross-origin
     maxAge: age,
-    path: '/',  // Add this line
+    path: '/',
+    partitioned: true,      // Add this for tracking prevention
   })
   .status(200)
   .json(userInfo);
+
 
   } catch (err) {
     console.log(err);

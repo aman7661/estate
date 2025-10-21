@@ -25,7 +25,7 @@ export const SocketContextProvider = ({ children }) => {
       return;
     }
 
-    // Get JWT token from cookies (instead of localStorage)
+    // Get JWT token from cookies (NOT localStorage)
     const token = getCookieValue('token');
     
     if (!token) {
@@ -56,11 +56,6 @@ export const SocketContextProvider = ({ children }) => {
 
       newSocket.on('connect_error', (error) => {
         console.error('❌ Socket connection failed:', error.message);
-        if (error.message.includes('Authentication') || error.message.includes('Invalid token')) {
-          // Handle expired/invalid token - clear cookie
-          document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          console.log('🔑 Token cookie cleared due to authentication error');
-        }
       });
 
       newSocket.on('disconnect', () => {

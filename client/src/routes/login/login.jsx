@@ -8,7 +8,7 @@ function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { updateUser } = useContext(AuthContext);
+  const {updateUser} = useContext(AuthContext)
 
   const navigate = useNavigate();
 
@@ -27,23 +27,15 @@ function Login() {
         password,
       });
 
-      console.log('🔍 Login response:', res.data);
-      console.log('🔍 Response keys:', Object.keys(res.data));
-      
-      updateUser(res.data);
-      
-      console.log('🔍 User updated. Check localStorage:', localStorage.getItem("user"));
-      console.log('🔍 Current user state should be set now');
+      updateUser(res.data)
 
       navigate("/");
     } catch (err) {
-      console.error('❌ Login error:', err);
       setError(err.response.data.message);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="login">
       <div className="formContainer">

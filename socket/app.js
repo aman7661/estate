@@ -39,4 +39,6 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen("4000");
+const port = process.env.PORT || 4000;
+io.listen(port);
+console.log(`Socket server running on port ${port}`);

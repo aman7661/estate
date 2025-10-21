@@ -1,10 +1,22 @@
+import express from 'express';
+import { createServer } from 'http';
 import { Server } from "socket.io";
 
-const io = new Server({
+const app = express();
+const server = createServer(app);
+
+const io = new Server(server, {
   cors: {
-    // origin: true,
-    origin: process.env.CLIENT_URL, credentials: true, methods: 'GET,HEAD,PATCH,PUT,POST,DELETE', allowedHeaders: 'Content-Type,Authorization'
+    origin: process.env.CLIENT_URL || "https://estate-ugsp.onrender.com",
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PATCH', 'PUT', 'POST', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   },
+});
+
+// Basic route to test server is running
+app.get('/', (req, res) => {
+  res.send('Socket.IO server is running!');
 });
 
 let onlineUser = [];
@@ -31,7 +43,9 @@ io.on("connection", (socket) => {
 
   socket.on("sendMessage", ({ receiverId, data }) => {
     const receiver = getUser(receiverId);
-    io.to(receiver.socketId).emit("getMessage", data);
+    if (receiver) {
+      io.to(receiver.socketId).emit("getMessage", data);
+    }
   });
 
   socket.on("disconnect", () => {
@@ -39,4 +53,8 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen("4000");
+// Use Render's PORT environment variable
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Socket.IO server running on port ${PORT}`);
+});

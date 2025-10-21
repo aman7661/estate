@@ -59,16 +59,16 @@ export const login = async (req, res) => {
     const { password: userPassword, ...userInfo } = user;
 
     res
-      .cookie("token", token, {
-        httpOnly: false,     // MUST be false for JavaScript access
-        secure: false,       // Try false first
-        sameSite: 'Lax',     // Use Lax instead of None
-        maxAge: age,
-        path: '/',
-        domain: undefined    // Don't set domain explicitly
-      })
-      .status(200)
-      .json(userInfo);
+  .cookie("token", token, {
+    httpOnly: false,
+    secure: true,          // MUST be true for SameSite=None
+    sameSite: 'None',      // Change from 'Lax' to 'None' for cross-origin
+    maxAge: age,
+    path: '/',
+  })
+  .status(200)
+  .json(userInfo);
+
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to login!" });

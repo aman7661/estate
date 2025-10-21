@@ -10,12 +10,10 @@ import messageRoute from "./routes/message.route.js";
 import paymentRoute from "./routes/payment.route.js";
 import bookRoute from "./routes/book.route.js"
 
-
-
 const app = express();
 
 app.use(cors({ 
-  origin: ["http://localhost:5173", "https://deployed-real-estate.onrender.com","https://estate-ugsp.onrender.com"],
+  origin: ["http://localhost:5173", "https://estate-ugsp.onrender.com"],  // Your current frontend URL
   credentials: true, 
   methods: 'GET,HEAD,PATCH,PUT,POST,DELETE', 
   allowedHeaders: 'Content-Type,Authorization' 
@@ -31,7 +29,6 @@ app.use("/api/chats", chatRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/book", bookRoute);
-
 
 app.listen(8800, () => {
   console.log("Server is running!");

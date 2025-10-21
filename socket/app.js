@@ -1,16 +1,38 @@
 import { Server } from "socket.io";
+import { createServer } from "http";
+import express from "express";
 
-const io = new Server({
+// Create Express app
+const app = express();
+
+// Create HTTP server
+const server = createServer(app);
+
+// Create Socket.IO server on top of HTTP server
+const io = new Server(server, {
   cors: {
     origin: [
       "https://estate-ugsp.onrender.com",
       "http://localhost:5173",
       process.env.CLIENT_URL
-    ].filter(Boolean), // Remove any undefined values
+    ].filter(Boolean),
     credentials: true,
     methods: ['GET', 'HEAD', 'PATCH', 'PUT', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
   },
+});
+
+// Add health check route
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'Socket server running',
+    timestamp: new Date().toISOString(),
+    connectedUsers: onlineUser.length
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
 });
 
 let onlineUser = [];
@@ -55,6 +77,7 @@ io.on("connection", (socket) => {
 });
 
 const port = process.env.PORT || 4000;
-io.listen(port);
-console.log(`Socket server running on port ${port}`);
-console.log(`CORS configured for: ${process.env.CLIENT_URL || 'No CLIENT_URL set'}`);
+server.listen(port, () => {
+  console.log(`Socket server running on port ${port}`);
+  console.log(`CORS configured for: ${process.env.CLIENT_URL || 'No CLIENT_URL set'}`);
+});

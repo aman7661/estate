@@ -10,8 +10,6 @@ import messageRoute from "./routes/message.route.js";
 import paymentRoute from "./routes/payment.route.js";
 import bookRoute from "./routes/book.route.js"
 
-
-
 const app = express();
 
 app.use(cors({ 
@@ -23,6 +21,23 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// ADD THIS ROOT ROUTE HANDLER
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Estate API Server is running!',
+    status: 'success',
+    endpoints: [
+      '/api/auth',
+      '/api/users', 
+      '/api/posts',
+      '/api/chats',
+      '/api/messages',
+      '/api/payment',
+      '/api/book'
+    ]
+  });
+});
+
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
@@ -32,7 +47,8 @@ app.use("/api/messages", messageRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/book", bookRoute);
 
-
-app.listen(8800, () => {
-  console.log("Server is running!");
+// FIX PORT CONFIGURATION FOR RENDER
+const PORT = process.env.PORT || 8800;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}!`);
 });

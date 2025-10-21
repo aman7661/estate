@@ -15,7 +15,7 @@ import bookRoute from "./routes/book.route.js"
 const app = express();
 
 app.use(cors({ 
-  origin: ["http://localhost:5173", "https://deployed-real-estate.onrender.com"],
+  origin: ["http://localhost:5173", "https://deployed-real-estate.onrender.com","https://estate-ugsp.onrender.com"],
   credentials: true, 
   methods: 'GET,HEAD,PATCH,PUT,POST,DELETE', 
   allowedHeaders: 'Content-Type,Authorization' 
